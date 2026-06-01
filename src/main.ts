@@ -10,6 +10,7 @@ import * as minisign from './minisign.ts';
 import { raceThenFallback, AllAttemptsFailedError } from './race.ts';
 import { withRetry, TransientError } from './retry.ts';
 import { withSource } from './source-tag.ts';
+import { downloadToTempFile } from './download.ts';
 import { errMessage, requireEnv } from './util.ts';
 import pkg from '../package.json' with { type: 'json' };
 
@@ -20,8 +21,9 @@ const CANONICAL_RELEASE = 'https://ziglang.org/download';
 const MIRRORS_URL = 'https://ziglang.org/download/community-mirrors.txt';
 const MIRRORS_LIST_CACHE_KEY = `setup-zig-mirrors-${pkg.version}`;
 const MIRRORS_LIST_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
-const MIRROR_TIMEOUT_MS = 30_000;
 const MIRROR_LIST_TIMEOUT_MS = 5_000;
+const MIRROR_SIG_TIMEOUT_MS = 30_000;
+const MIRROR_TARBALL_TIMEOUT_MS = 120_000;
 const MIRROR_RACE_SIZE = 3;
 const SOURCE_TAG = `setup-zig/${pkg.version}`;
 
@@ -36,15 +38,26 @@ interface DownloadResult {
   mirror_used: string;
 }
 
-async function downloadFromMirror(mirror: string, tarball_filename: string): Promise<string> {
+async function downloadFromMirror(
+  mirror: string,
+  tarball_filename: string,
+  signal: AbortSignal,
+): Promise<string> {
   // Retry only the fetch leg once on transient failures (5xx, abort, network
   // resets). Signature/verification failures are deterministic and never retried.
+  // The `signal` parameter cancels the in-flight fetches when the surrounding
+  // race decides a winner — saves losing mirrors a full tarball download.
   const tarball_url = withSource(`${mirror}/${tarball_filename}`, SOURCE_TAG);
   const sig_url = withSource(`${mirror}/${tarball_filename}.minisig`, SOURCE_TAG);
 
   const { tarball_path, sig_data } = await withRetry(async () => {
-    const path = await tc.downloadTool(tarball_url);
-    const resp = await fetch(sig_url, { signal: AbortSignal.timeout(MIRROR_TIMEOUT_MS) });
+    const path = await downloadToTempFile({
+      url: tarball_url,
+      signal,
+      timeoutMs: MIRROR_TARBALL_TIMEOUT_MS,
+    });
+    const sig_signal = AbortSignal.any([signal, AbortSignal.timeout(MIRROR_SIG_TIMEOUT_MS)]);
+    const resp = await fetch(sig_url, { signal: sig_signal });
     if (!resp.ok) {
       throw new TransientError(`signature fetch failed (HTTP ${resp.status}) for '${sig_url}'`);
     }
@@ -163,7 +176,8 @@ async function downloadTarball(tarball_filename: string, attempt_log: MirrorAtte
     core.info(`Using mirror override: ${preferred_mirror}`);
     const t0 = Date.now();
     try {
-      const tarball_path = await downloadFromMirror(preferred_mirror, tarball_filename);
+      const signal = new AbortController().signal;
+      const tarball_path = await downloadFromMirror(preferred_mirror, tarball_filename, signal);
       attempt_log.push({ mirror: preferred_mirror, ms: Date.now() - t0, status: 'ok' });
       return { tarball_path, mirror_used: preferred_mirror };
     } catch (err) {
@@ -181,8 +195,8 @@ async function downloadTarball(tarball_filename: string, attempt_log: MirrorAtte
     const { winner } = await raceThenFallback(
       mirrors,
       MIRROR_RACE_SIZE,
-      async (mirror) => {
-        const tarball_path = await downloadFromMirror(mirror, tarball_filename);
+      async (mirror, signal) => {
+        const tarball_path = await downloadFromMirror(mirror, tarball_filename, signal);
         return { tarball_path, mirror_used: mirror };
       },
       race_log,
@@ -194,7 +208,8 @@ async function downloadTarball(tarball_filename: string, attempt_log: MirrorAtte
     if (!(err instanceof AllAttemptsFailedError)) throw err;
   }
 
-  // Last resort: official site.
+  // Last resort: official site. No racing here, so no external signal —
+  // downloadToTempFile will still apply its internal timeout.
   const version_match = /\d+\.\d+\.\d+(-dev\.\d+\+[0-9a-f]+)?/.exec(tarball_filename);
   if (!version_match) {
     throw new AllAttemptsFailedError(`could not extract version from '${tarball_filename}'`);
@@ -203,7 +218,7 @@ async function downloadTarball(tarball_filename: string, attempt_log: MirrorAtte
   const canonical = zig_version.includes('-dev') ? CANONICAL_DEV : `${CANONICAL_RELEASE}/${zig_version}`;
   core.info(`Attempting official: ${canonical}`);
   const t0 = Date.now();
-  const tarball_path = await downloadFromMirror(canonical, tarball_filename);
+  const tarball_path = await downloadFromMirror(canonical, tarball_filename, new AbortController().signal);
   attempt_log.push({ mirror: canonical, ms: Date.now() - t0, status: 'ok' });
   return { tarball_path, mirror_used: canonical };
 }

@@ -21,18 +21,18 @@ export class AllAttemptsFailedError extends Error {
 }
 
 /**
- * Race the first `raceSize` items concurrently using Promise.any; on race-pool
- * exhaustion, fall back to sequential attempts on the remaining items. The
- * `attempt` callback is invoked once per item. Each invocation's outcome is
- * appended to `log` for reporting. The first successful attempt's value is
- * returned. Throws AllAttemptsFailedError if every item fails.
- *
- * `attempt` may throw or reject; the error message is captured into the log.
+ * Race the first `raceSize` items concurrently using `Promise.any`; on
+ * race-pool exhaustion, fall back to sequential attempts on the remaining
+ * items. `attempt` is invoked once per item with that item's own
+ * `AbortSignal`. When the race resolves, every other attempt's signal is
+ * aborted so losers can stop their in-flight work (e.g. a download
+ * `fetch`). Each invocation's outcome is appended to `log`. Throws
+ * `AllAttemptsFailedError` if every item fails.
  */
 export async function raceThenFallback<T>(
   items: readonly string[],
   raceSize: number,
-  attempt: (item: string) => Promise<T>,
+  attempt: (item: string, signal: AbortSignal) => Promise<T>,
   log: AttemptOutcome[],
 ): Promise<RaceResult<T>> {
   if (items.length === 0) {
@@ -44,29 +44,38 @@ export async function raceThenFallback<T>(
 
   // Race lane.
   if (race_pool.length > 1) {
+    const controllers = race_pool.map(() => new AbortController());
     try {
-      const winner = await Promise.any(race_pool.map((item) => runAttempt(item, attempt, log)));
+      const winner = await Promise.any(race_pool.map((item, i) =>
+        runAttempt(item, () => attempt(item, controllers[i]!.signal), log),
+      ));
+      // Cancel any still-running losers. Aborting an already-resolved
+      // controller is a no-op, so we don't need to track which won.
+      for (const c of controllers) c.abort();
       return { winner, via: 'race' };
     } catch {
+      for (const c of controllers) c.abort();
       // All raced attempts failed; fall through to sequential.
     }
   } else {
     // Single-item "race" — just run it inline so the log lane is consistent.
+    const controller = new AbortController();
     try {
-      const winner = await runAttempt(race_pool[0]!, attempt, log);
+      const winner = await runAttempt(race_pool[0]!, () => attempt(race_pool[0]!, controller.signal), log);
       return { winner, via: 'race' };
     } catch {
-      // continue
+      controller.abort();
     }
   }
 
   // Sequential lane.
   for (const item of rest) {
+    const controller = new AbortController();
     try {
-      const winner = await runAttempt(item, attempt, log);
+      const winner = await runAttempt(item, () => attempt(item, controller.signal), log);
       return { winner, via: 'sequential' };
     } catch {
-      // continue to next
+      controller.abort();
     }
   }
 
@@ -75,12 +84,12 @@ export async function raceThenFallback<T>(
 
 async function runAttempt<T>(
   item: string,
-  attempt: (item: string) => Promise<T>,
+  thunk: () => Promise<T>,
   log: AttemptOutcome[],
 ): Promise<T> {
   const t0 = Date.now();
   try {
-    const value = await attempt(item);
+    const value = await thunk();
     log.push({ item, ms: Date.now() - t0, status: 'ok' });
     return value;
   } catch (err) {

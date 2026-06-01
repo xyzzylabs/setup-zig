@@ -98,6 +98,51 @@ test('race: outcome log includes duration measurements', async () => {
   assert.ok(log[0]!.ms >= 25, `expected ms >= 25, got ${log[0]!.ms}`);
 });
 
+test('race: aborts losing attempts via their AbortSignal when a winner is found', async () => {
+  const log: AttemptOutcome[] = [];
+  const aborted: string[] = [];
+
+  const { winner } = await raceThenFallback(
+    ['fast', 'slow1', 'slow2'],
+    3,
+    (item, signal) => new Promise<string>((resolve, reject) => {
+      if (item === 'fast') {
+        setTimeout(() => resolve('fast-value'), 10);
+        return;
+      }
+      // Slow attempts: never resolve unless aborted.
+      const onAbort = () => {
+        aborted.push(item);
+        reject(new Error('aborted'));
+      };
+      signal.addEventListener('abort', onAbort, { once: true });
+    }),
+    log,
+  );
+
+  assert.equal(winner, 'fast-value');
+  // Give the losers a microtask tick to observe the abort.
+  await new Promise(r => setTimeout(r, 5));
+  assert.deepEqual(aborted.sort(), ['slow1', 'slow2']);
+});
+
+test('race: sequential lane also passes a signal that gets aborted on win', async () => {
+  const log: AttemptOutcome[] = [];
+  let signalSeen = false;
+
+  await raceThenFallback(
+    ['only'],
+    1,
+    async (_item, signal) => {
+      signalSeen = signal instanceof AbortSignal;
+      return 'ok';
+    },
+    log,
+  );
+
+  assert.equal(signalSeen, true);
+});
+
 test('race: race pool exhausts even when some succeed late, fastest still wins', async () => {
   // Promise.any returns on first success, but losers still run.
   // Make sure the loser eventually finishing doesn't leak into the winner result.
