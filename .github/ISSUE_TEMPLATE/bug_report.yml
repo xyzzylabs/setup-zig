@@ -1,0 +1,91 @@
+name: Bug report
+description: Something the action does is wrong, broken, or unclear.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in as much
+        of the form as you can — the more reproducible the report, the
+        faster we can act on it.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear, concise description of the bug.
+      placeholder: When I set `version: 0.13.0`, the action installs 0.12.0 instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal workflow that reproduces it
+      description: |
+        The smallest workflow snippet that triggers the bug. Strip out
+        anything irrelevant. Include the `with:` block in full.
+      render: yaml
+      placeholder: |
+        jobs:
+          test:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v4
+              - uses: xyzzylabs/setup-zig@v1
+                with:
+                  version: 0.13.0
+              - run: zig version
+    validations:
+      required: true
+
+  - type: input
+    id: runner-os
+    attributes:
+      label: Runner OS
+      placeholder: ubuntu-latest / macos-latest / windows-latest / self-hosted (...)
+    validations:
+      required: true
+
+  - type: input
+    id: requested-version
+    attributes:
+      label: Requested Zig version
+      placeholder: 0.13.0 / master / latest / 2024.5.0-mach / (auto via build.zig.zon)
+    validations:
+      required: true
+
+  - type: input
+    id: action-version
+    attributes:
+      label: Action version
+      description: The tag or commit SHA you used for `xyzzylabs/setup-zig@…`.
+      placeholder: v1.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproduces-without-mirror
+    attributes:
+      label: Does it reproduce without the `mirror:` input?
+      description: Helps us tell mirror-specific issues apart from action bugs.
+      options:
+        - "Yes — reproduces without mirror"
+        - "No — only happens with a specific mirror"
+        - "I'm not using the mirror input"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Paste the failing step's log. Strip secrets.
+      render: shell
+
+  - type: textarea
+    id: extras
+    attributes:
+      label: Anything else?
+      description: Other context, screenshots, links to runs, etc.

@@ -1,30 +1,98 @@
 name: 'Setup Zig Compiler'
-description: 'Download and install the Zig compiler, and cache the global Zig cache'
+description: >
+  Install the Zig compiler from a randomized community mirror, verify the
+  download against the official minisign signature, and cache the global
+  Zig cache between runs.
+author: 'Sergey Rubanov'
+branding:
+  icon: 'download'
+  color: 'orange'
+
 inputs:
+  # -- Version resolution ------------------------------------------------------
   version:
-    description: 'Version of the Zig compiler, e.g. "0.13.0" or "0.13.0-dev.351+64ef45eb0". "master" uses the latest nightly build. "latest" uses the latest tagged release. Leave empty to use minimum_zig_version from build.zig.zon, with a fallback to "latest".'
-    default: ''
-  mirror:
-    description: 'Override of Zig download mirror to use, e.g. "https://pkg.machengine.org/zig".'
+    description: >
+      Zig version to install. Accepts a release ("0.16.0"), a nightly
+      ("0.17.0-dev.123+abcdef012"), a Mach nominated version
+      ("2024.5.0-mach"), or the literal strings "master" and "latest".
+      Leave empty to resolve from `zig-version-file` (if set), then from
+      `minimum_zig_version` in `build.zig.zon`, falling back to "latest".
     required: false
     default: ''
+  zig-version-file:
+    description: >
+      Path to a file containing the Zig version to install (e.g.
+      ".zigversion"). Accepts a plain version string or a single
+      "zig <version>" line in mise / asdf `.tool-versions` format.
+      Ignored when `version` is set.
+    required: false
+    default: ''
+
+  # -- Download options --------------------------------------------------------
+  mirror:
+    description: >
+      Optional mirror override (e.g. "https://pkg.machengine.org/zig").
+      The official ziglang.org host is rejected here to avoid hammering
+      the canonical site with redirected traffic. Leave empty to use
+      the community mirror list.
+    required: false
+    default: ''
+  libc:
+    description: >
+      On Linux only: choose "glibc" (default) or "musl" tarballs.
+      Ignored on macOS and Windows runners.
+    required: false
+    default: ''
+
+  # -- Cache ------------------------------------------------------------------
   use-cache:
-    description: 'Whether to cache the global and local Zig cache directories.'
-    required: true
-    default: true
+    description: >
+      Cache the global Zig cache directory between workflow runs.
+      Defaults to true; set to false to disable.
+    required: false
+    default: 'true'
   cache-key:
-    description: 'Additional cache key component to include when caching the global Zig cache directory. When using a matrix strategy, this should include the matrix variables to ensure all jobs are cached. Matrix variables which decide the OS can be omitted, since the OS is always included in the cache key.'
+    description: >
+      Extra cache key component appended to the default key. Use this to
+      include matrix variables that should partition the cache (e.g.
+      target triple, optimize mode). Variables that select the runner OS
+      can be omitted — the OS is always part of the key.
     required: false
     default: ''
   cache-size-limit:
-    description: 'The maximum permitted size of the global Zig cache directory, in MiB. When the cache directory exceeds this size, it is cleared. Default is 2048 (2 GiB). 0 means no limit.'
-    required: true
-    default: 2048
+    description: >
+      Maximum permitted size of the global Zig cache directory, in MiB.
+      The cache is cleared once it exceeds this threshold. Default is
+      2048 (2 GiB). Set to 0 to disable the size cap.
+    required: false
+    default: '2048'
+
+  # -- Advanced ---------------------------------------------------------------
   use-tool-cache:
-    description: 'Override whether to use the tool cache when caching Zig installations. Default is false for GitHub-hosted runners, true for other runners.'
+    description: >
+      Override the automatic decision about whether to use the
+      `@actions/tool-cache` directory. Defaults to "false" on
+      GitHub-hosted runners (the tool cache lives on a slow disk there)
+      and "true" elsewhere. Accepts "true" or "false".
     required: false
     default: ''
+
+outputs:
+  zig-version:
+    description: >
+      The resolved Zig version that was installed
+      (e.g. "0.16.0", "0.17.0-dev.123+abcdef012").
+  mirror-used:
+    description: >
+      The mirror URL that served the tarball, or "cache" / "tool-cache"
+      when a cache hit served the install. Useful for telemetry and
+      cache-warmth dashboards.
+  cache-hit:
+    description: >
+      The string "true" if Zig was served from a cache (actions cache or
+      tool-cache), "false" otherwise.
+
 runs:
-  using: 'node20'
-  main: 'main.js'
-  post: 'post.js'
+  using: 'node24'
+  main: 'src/main.ts'
+  post: 'src/post.ts'

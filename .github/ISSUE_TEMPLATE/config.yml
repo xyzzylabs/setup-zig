@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/xyzzylabs/setup-zig/security/advisories/new
+    about: Please report security issues privately using GitHub's security advisory form. See SECURITY.md.
+  - name: Zig compiler bug
+    url: https://github.com/ziglang/zig/issues
+    about: Issues in the Zig compiler itself belong in ziglang/zig, not here.

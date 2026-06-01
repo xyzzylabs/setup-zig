@@ -1,0 +1,34 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage output
+coverage/
+.nyc_output/
+
+# Local scratch
+.env
+.env.local
+*.local
+
+# Zig
+.zig-cache/
+zig-out/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# node_modules is intentionally committed: required for the GitHub Actions
+# runtime to resolve @actions/* without a build step. There is no `dist/`
+# directory — Node 24's native TypeScript stripping runs src/main.ts directly.

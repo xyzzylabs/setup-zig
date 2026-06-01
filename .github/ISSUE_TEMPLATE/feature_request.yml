@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest a new input, output, or behavior.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: |
+        Describe the actual workflow pain you hit. We're more likely to
+        adopt a feature when we understand the underlying need than when
+        we're handed a specific solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like the action to behave? Example workflow encouraged.
+      render: yaml
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds have you tried, and where did they fall short?
+
+  - type: textarea
+    id: extras
+    attributes:
+      label: Anything else?

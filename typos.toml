@@ -1,0 +1,31 @@
+# https://github.com/crate-ci/typos
+#
+# This file holds project-specific overrides. The default typo dictionary
+# is fine for almost everything; we only list cases the curated list
+# would false-positive on.
+
+[default]
+# Don't scan vendored / generated stuff.
+extend-ignore-re = [
+  # base64 minisign key block — random characters, never typos
+  "RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti\\+JO/wCYvhbAb/U",
+]
+
+[files]
+extend-exclude = [
+  "node_modules",
+  "package-lock.json",
+  "data/fallback-mirrors.json",
+]
+
+[default.extend-words]
+# Project-specific identifiers and platform names the curated list might
+# misclassify.
+zon = "zon"
+ziglang = "ziglang"
+musl = "musl"
+glibc = "glibc"
+loongarch = "loongarch"
+riscv = "riscv"
+illumos = "illumos"
+mlugg = "mlugg"

@@ -1,19 +1,45 @@
 {
   "name": "setup-zig",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "private": true,
+  "description": "GitHub Action that installs the Zig compiler and caches the global Zig cache directory.",
+  "type": "module",
+  "main": "src/main.ts",
+  "homepage": "https://github.com/xyzzylabs/setup-zig#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xyzzylabs/setup-zig.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xyzzylabs/setup-zig/issues"
+  },
+  "author": "Sergey Rubanov",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsgo --project tsconfig.json",
+    "test": "node --test 'test/*.test.ts'",
+    "verify": "npm run typecheck && npm run test"
+  },
+  "keywords": [
+    "actions",
+    "zig",
+    "ziglang",
+    "setup",
+    "github-actions",
+    "minisign"
+  ],
   "dependencies": {
-    "@actions/cache": "^4.0.2",
-    "@actions/core": "^1.11.1",
-    "@actions/exec": "^1.1.1",
-    "@actions/github": "^6.0.1",
-    "@actions/tool-cache": "^2.0.2"
+    "@actions/cache": "^6.0.1",
+    "@actions/core": "^3.0.1",
+    "@actions/exec": "^3.0.0",
+    "@actions/github": "^9.1.1",
+    "@actions/tool-cache": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260527.2"
   }
 }
