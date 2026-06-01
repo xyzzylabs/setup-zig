@@ -1,8 +1,5 @@
-name: 'Setup Zig Compiler'
-description: >
-  Install the Zig compiler from a randomized community mirror, verify the
-  download against the official minisign signature, and cache the global
-  Zig cache between runs.
+name: 'Install Zig'
+description: 'Install the Zig compiler with minisign verification and cache the global Zig cache between workflow runs.'
 author: 'Sergey Rubanov'
 branding:
   icon: 'download'
