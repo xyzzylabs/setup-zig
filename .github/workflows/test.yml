@@ -139,6 +139,7 @@ jobs:
           - '0.14.1'  # zig-linux-x86_64 -> zig-x86_64-linux
           - '0.15.0'
           - '0.15.1'  # armv7a -> arm
+          - '0.16.0'  # current stable; keep pinned so coverage survives the next release
     steps:
       - name: Harden runner
         if: runner.os == 'Linux'
