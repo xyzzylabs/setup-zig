@@ -122,7 +122,7 @@ jobs:
           fi
 
   test:
-    name: zig init / build test (${{ matrix.os }}, ${{ matrix.zig_version }})
+    name: smoke test (${{ matrix.os }}, ${{ matrix.zig_version }})
     needs: check
     runs-on: ${{ matrix.os }}
     permissions:
@@ -151,10 +151,19 @@ jobs:
       - name: Set up Zig
         uses: ./
         with: { version: '${{ matrix.zig_version }}' }
-      - name: Run `zig init` and `zig build test`
+      - name: Smoke-test the installed Zig
         shell: bash
         run: |
-          mkdir init
-          cd init
-          zig init
-          zig build test
+          # Verify Zig is on PATH, reports a version, and can compile + run
+          # a tiny self-contained test program. We do NOT rely on
+          # `zig init`'s template here — that template has occasionally
+          # shipped broken across releases (e.g. 0.16.0's `init` parameter
+          # shadowing), and a template bug would falsely fail this matrix.
+          zig version
+          cat >smoke.zig <<'EOF'
+          const std = @import("std");
+          test "two plus two" {
+              try std.testing.expect(2 + 2 == 4);
+          }
+          EOF
+          zig test smoke.zig
