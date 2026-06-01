@@ -34,6 +34,10 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          # Use a PAT so the Release PR is created by the token owner
+          # rather than `github-actions[bot]`. The default GITHUB_TOKEN
+          # cannot create PRs when the org policy disables it.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
   update-major-tag:
     name: Advance floating major tag
@@ -51,6 +55,9 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
+          # Use the same PAT as release-please so the tag push is
+          # authenticated and attributed consistently with the release.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
       - name: Move floating major tag
         env:
           TAG: ${{ needs.release-please.outputs.tag_name }}
