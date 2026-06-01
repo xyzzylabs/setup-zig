@@ -2,6 +2,23 @@
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.0](https://github.com/xyzzylabs/setup-zig/compare/v1.0.0...v1.0.0) (2026-06-01)
+
+
+### Added
+
+* independent v1 — TypeScript/ESM rewrite on Node 24 ([0d679f1](https://github.com/xyzzylabs/setup-zig/commit/0d679f107035775d33caf7bbf677bcead56ca5d3))
+
+
+### Fixed
+
+* handle new tarball name format as of 0.14.1 ([7dccf5e](https://github.com/xyzzylabs/setup-zig/commit/7dccf5e6d09267c55f815f2db29495f30ba2ebca))
+
+
+### Performance
+
+* cancel losing mirror downloads when the race resolves ([8305478](https://github.com/xyzzylabs/setup-zig/commit/830547893540b56a224fbd4e2cfee02c3376d497))
+
 ## [1.0.0] - 2026-06-01
 
 Initial release as an independent project. The codebase originated as a
