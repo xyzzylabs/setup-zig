@@ -95798,12 +95798,9 @@ async function downloadToTempFile(opts) {
     return dest;
 }
 
-;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"rE":"1.0.0"};
 ;// CONCATENATED MODULE: ./data/fallback-mirrors.json
 const fallback_mirrors_namespaceObject = /*#__PURE__*/JSON.parse('["https://pkg.machengine.org/zig","https://zigmirror.hryx.net/zig","https://zig.linus.dev/zig","https://zig.squirl.dev","https://zig.florent.dev","https://zig.mirror.mschae23.de/zig","https://zigmirror.meox.dev","https://ziglang.freetls.fastly.net","https://zig.tilok.dev","https://zig-mirror.tsimnet.eu/zig","https://zig.karearl.com/zig","https://pkg.earth/zig","https://fs.liujiacai.net/zigbuilds"]');
 ;// CONCATENATED MODULE: ./src/main.ts
-
 
 
 
@@ -95823,13 +95820,20 @@ const MINISIGN_KEY = 'RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U';
 const CANONICAL_DEV = 'https://ziglang.org/builds';
 const CANONICAL_RELEASE = 'https://ziglang.org/download';
 const MIRRORS_URL = 'https://ziglang.org/download/community-mirrors.txt';
-const MIRRORS_LIST_CACHE_KEY = `setup-zig-mirrors-${package_namespaceObject.rE}`;
+// Static cache key (bump the suffix only if the mirror-list format changes).
+// Deliberately NOT derived from the package version: the version lives in
+// package.json, which release-please bumps without rebuilding the bundle —
+// embedding it here would make every release PR drift dist/.
+const MIRRORS_LIST_CACHE_KEY = 'setup-zig-mirrors-v1';
 const MIRRORS_LIST_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const MIRROR_LIST_TIMEOUT_MS = 5_000;
 const MIRROR_SIG_TIMEOUT_MS = 30_000;
 const MIRROR_TARBALL_TIMEOUT_MS = 120_000;
 const MIRROR_RACE_SIZE = 3;
-const SOURCE_TAG = `setup-zig/${package_namespaceObject.rE}`;
+// Mirror operators use the `?source=` tag to attribute traffic. We pass the
+// ref the action was invoked at (e.g. "v1"), read at runtime from the env so
+// the bundle stays version-independent; falls back to a bare identifier.
+const SOURCE_TAG = `setup-zig/${process.env['GITHUB_ACTION_REF'] || 'unknown'}`;
 async function downloadFromMirror(mirror, tarball_filename, signal) {
     // Retry only the fetch leg once on transient failures (5xx, abort, network
     // resets). Signature/verification failures are deterministic and never retried.
