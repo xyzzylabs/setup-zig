@@ -2,6 +2,19 @@
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.1](https://github.com/xyzzylabs/setup-zig/compare/v1.0.0...v1.0.1) (2026-06-03)
+
+
+### Fixed
+
+* decouple the bundle from the package version ([1576eb3](https://github.com/xyzzylabs/setup-zig/commit/1576eb3931a524a696e47c017f5619e4ec327753))
+
+
+### Build
+
+* bundle action with @vercel/ncc and stop vendoring node_modules ([42e8d28](https://github.com/xyzzylabs/setup-zig/commit/42e8d289a60bc271f0e9eadcd7df8c826a09d39b))
+* drop ncc --minify for reproducible cross-Node bundles ([9e61566](https://github.com/xyzzylabs/setup-zig/commit/9e61566f15a2c5289f27f3ec658cc27fc9b5edd6))
+
 ## [1.0.0](https://github.com/xyzzylabs/setup-zig/compare/v1.0.0...v1.0.0) (2026-06-01)
 
 
