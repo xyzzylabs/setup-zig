@@ -1,0 +1,64 @@
+name: rebuild-dist
+
+# When Renovate bumps a bundled dependency, the committed dist/ goes stale
+# and the dist-drift gate in `test` fails. Renovate can't run the build
+# itself, so this workflow rebuilds dist/ on Renovate's PRs and pushes the
+# regenerated bundle back onto the PR branch.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rebuild-dist-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rebuild:
+    name: Rebuild committed bundle
+    # Only act on Renovate's own PRs to avoid pushing to forks or arbitrary
+    # contributor branches.
+    if: ${{ github.actor == 'renovate[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        with:
+          egress-policy: audit
+      - name: Check out PR branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm ci
+      - name: Rebuild dist/
+        run: npm run build
+      - name: Commit dist/ if it changed
+        env:
+          # Route the branch name through the environment rather than
+          # interpolating it into the shell, so an exotic branch name can't
+          # inject into the push command.
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ -z "$(git status --porcelain dist/)" ]; then
+            echo "dist/ already up to date; nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist/
+          git commit -m "build: rebuild dist/ for dependency update"
+          git push origin "HEAD:refs/heads/${HEAD_REF}"
