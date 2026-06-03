@@ -13,6 +13,7 @@ import { withSource } from './source-tag.ts';
 import { downloadToTempFile } from './download.ts';
 import { errMessage, requireEnv } from './util.ts';
 import pkg from '../package.json' with { type: 'json' };
+import fallback_mirrors_data from '../data/fallback-mirrors.json' with { type: 'json' };
 
 const MINISIGN_KEY = 'RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U';
 const CANONICAL_DEV = 'https://ziglang.org/builds';
@@ -112,14 +113,19 @@ function rejectOfficialMirrorOverride(raw: string): void {
   }
 }
 
-async function loadFallbackMirrors(): Promise<string[]> {
-  const file = path.join(import.meta.dirname, '..', 'data', 'fallback-mirrors.json');
-  const text = await fs.readFile(file, 'utf8');
-  const parsed: unknown = JSON.parse(text);
-  if (!Array.isArray(parsed) || !parsed.every((s): s is string => typeof s === 'string')) {
-    throw new Error(`Malformed ${file}: expected an array of strings`);
+// Validate the bundled fallback list once at module load so a malformed
+// data file fails the build, not the install.
+const FALLBACK_MIRRORS: readonly string[] = (() => {
+  if (!Array.isArray(fallback_mirrors_data)
+      || !fallback_mirrors_data.every((s): s is string => typeof s === 'string')) {
+    throw new Error('data/fallback-mirrors.json must be an array of strings');
   }
-  return parsed;
+  return fallback_mirrors_data;
+})();
+
+function loadFallbackMirrors(): string[] {
+  // Return a copy — the caller passes the array through shuffleInPlace.
+  return [...FALLBACK_MIRRORS];
 }
 
 async function fetchMirrorList(): Promise<string[]> {
@@ -157,7 +163,7 @@ async function fetchMirrorList(): Promise<string[]> {
   } catch (err) {
     const msg = errMessage(err);
     core.warning(`Failed to fetch mirror list (${msg}); using bundled fallback`);
-    return await loadFallbackMirrors();
+    return loadFallbackMirrors();
   }
 }
 

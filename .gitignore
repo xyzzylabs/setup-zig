@@ -29,6 +29,7 @@ zig-out/
 # TypeScript build cache
 *.tsbuildinfo
 
-# node_modules is intentionally committed: required for the GitHub Actions
-# runtime to resolve @actions/* without a build step. There is no `dist/`
-# directory — Node 24's native TypeScript stripping runs src/main.ts directly.
+# node_modules is NOT committed — devDependencies are restored via `npm ci`
+# for tests/builds; the action runtime loads the @vercel/ncc-bundled output
+# under dist/, which has every transitive dependency inlined.
+node_modules/

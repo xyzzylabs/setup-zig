@@ -12,22 +12,34 @@ and pull requests here; we'll evaluate them on their own merits.
 
 ```sh
 node --version       # >= 24
-npm install          # installs runtime + tsgo (typecheck-only) deps
-npm run typecheck    # tsgo --noEmit
-npm test             # node --test 'test/*.test.ts' (native type stripping)
-npm run verify       # typecheck + tests (use before opening a PR)
+npm install          # installs runtime + tsgo + ncc + typescript devDeps
+npm run typecheck    # tsgo --noEmit (fast project-wide typecheck)
+npm test             # node --test 'test/*.test.ts' (Node native type stripping)
+npm run build        # @vercel/ncc bundles src/main.ts and src/post.ts → dist/
+npm run verify       # typecheck + tests + build (use before opening a PR)
 ```
 
-The project is **ESM** end-to-end (`"type": "module"`). All source files
-use `import` / `export`, `import.meta.dirname`, and JSON import
-attributes.
+The project source is **ESM** TypeScript (`"type": "module"`, source
+files import with `import` / `export`). Tests run directly from
+`src/*.ts` via Node 24's native type stripping — no transpile step
+needed for tests.
 
-There is no build step. The GitHub Actions runtime (Node 24) strips
-TypeScript types natively, so the action's `runs.main` points directly
-at `src/main.ts`. `tsgo` is used **only for type checking**; nothing is
-emitted, nothing committed under `dist/`.
+The action runtime, by contrast, loads a **bundled** CommonJS or
+ESM file from `dist/main/index.js` / `dist/post/index.js` — produced
+by [`@vercel/ncc`][ncc] from the TypeScript source with every
+transitive dependency inlined. The bundle is committed because GitHub
+Actions runs the action straight from the checkout (no `npm install`
+at runtime).
 
-When editing source: change `src/*.ts`, run `npm run verify`, commit.
+When editing source:
+
+1. Change `src/*.ts`.
+2. Run `npm run verify` — this rebuilds `dist/` as a side effect.
+3. Commit both your `src/` changes **and** the regenerated `dist/`.
+
+CI rejects PRs whose committed `dist/` differs from a fresh build.
+
+[ncc]: https://github.com/vercel/ncc
 
 ## Tests
 

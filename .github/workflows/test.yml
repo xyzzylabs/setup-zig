@@ -51,6 +51,15 @@ jobs:
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+      - name: Rebuild dist/
+        run: npm run build
+      - name: Fail if committed dist/ is out of date
+        run: |
+          if [ -n "$(git status --porcelain dist/)" ]; then
+            echo "dist/ differs from the committed bundle. Run \`npm run build\` locally and commit."
+            git --no-pager diff -- dist/ | head -200
+            exit 1
+          fi
 
   test-from-project:
     name: Resolve from build.zig.zon

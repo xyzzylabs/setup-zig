@@ -21,7 +21,8 @@
   "scripts": {
     "typecheck": "tsgo --project tsconfig.json",
     "test": "node --test 'test/*.test.ts'",
-    "verify": "npm run typecheck && npm run test"
+    "build": "ncc build src/main.ts -o dist/main --minify --license licenses.txt && ncc build src/post.ts -o dist/post --minify --license licenses.txt",
+    "verify": "npm run typecheck && npm run test && npm run build"
   },
   "keywords": [
     "actions",
@@ -40,6 +41,8 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "@typescript/native-preview": "^7.0.0-dev.20260527.2"
+    "@typescript/native-preview": "^7.0.0-dev.20260527.2",
+    "@vercel/ncc": "^0.38.4",
+    "typescript": "^6.0.3"
   }
 }
