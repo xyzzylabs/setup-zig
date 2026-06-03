@@ -16,6 +16,8 @@ extend-exclude = [
   "node_modules",
   "package-lock.json",
   "data/fallback-mirrors.json",
+  # Bundled third-party code — typos in vendored deps are not ours to fix.
+  "dist/",
 ]
 
 [default.extend-words]
