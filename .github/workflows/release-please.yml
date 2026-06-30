@@ -28,16 +28,22 @@ jobs:
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
         with:
           egress-policy: audit
+      - name: Mint app token
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - name: Run release-please
         id: release
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-          # Use a PAT so the Release PR is created by the token owner
-          # rather than `github-actions[bot]`. The default GITHUB_TOKEN
-          # cannot create PRs when the org policy disables it.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # Use the GitHub App token (not GITHUB_TOKEN) so the Release PR is
+          # created as the app and therefore triggers CI. App installation
+          # tokens auto-rotate, so there is no expiry to maintain.
+          token: ${{ steps.app-token.outputs.token }}
 
   update-major-tag:
     name: Advance floating major tag
@@ -51,13 +57,18 @@ jobs:
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
         with:
           egress-policy: audit
+      - name: Mint app token
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - name: Check out repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
-          # Use the same PAT as release-please so the tag push is
-          # authenticated and attributed consistently with the release.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # App token so the tag push is authenticated and triggers CI.
+          token: ${{ steps.app-token.outputs.token }}
       - name: Move floating major tag
         env:
           TAG: ${{ needs.release-please.outputs.tag_name }}
