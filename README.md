@@ -161,9 +161,12 @@ backport changes from upstream. The substantive differences:
 - **GitHub Actions only.** Forgejo Actions support and the related
   mirror notice are gone; the action targets the GitHub runner
   exclusively.
-- **TypeScript on Node 24, no build step.** Sources are TypeScript under
-  `src/`, run directly by Node's native type stripping. `tsgo` is used
-  only for type checking; nothing is committed under `dist/`.
+- **TypeScript on Node 24, bundled with ncc.** Sources are TypeScript
+  under `src/`; tests run directly via Node's native type stripping and
+  `tsgo` handles type checking. The action runtime loads a committed
+  `@vercel/ncc` bundle under `dist/` (`dist/main/index.js`,
+  `dist/post/index.js`), rebuilt with `npm run build`, so the action
+  runs dependency-free straight from the checkout.
 - **New inputs:** `zig-version-file` (read the version from
   `.zigversion` / `.tool-versions` / any file) and `libc` (`glibc` /
   `musl` on Linux runners).
@@ -189,8 +192,9 @@ See [CHANGELOG.md](CHANGELOG.md) for the full changelog.
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). The short version: edit
-`src/*.ts`, run `npm run verify`, open a PR. There is no build step —
-Node 24 runs the TypeScript source directly via native type stripping.
+`src/*.ts`, run `npm run verify` (which rebuilds the committed `dist/`
+bundle via `npm run build`), and open a PR. CI enforces that the
+committed `dist/` stays in sync with a fresh build.
 
 ## License
 
