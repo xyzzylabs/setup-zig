@@ -149,6 +149,29 @@ jobs:
           - '0.15.0'
           - '0.15.1'  # armv7a -> arm
           - '0.16.0'  # current stable; keep pinned so coverage survives the next release
+        # `macos-latest` is now Apple Silicon (macos-26-arm64). Zig releases
+        # older than 0.14.1 ship a bundled compiler-rt whose macOS availability
+        # stubs reference `__availability_version_check`, a symbol the linker on
+        # the newer macOS SDK no longer resolves — every link then fails with
+        # "undefined symbol: __availability_version_check" (plus _abort,
+        # _malloc_size, _sigaction, …). Upstream fixed this in 0.14.1 / 0.15.1.
+        # Run the affected legacy versions on the Intel `macos-13` image (older
+        # SDK) so we keep real macOS coverage instead of dropping it.
+        # (2024.5.0-mach resolves to a 0.13.0-dev build and is affected too.)
+        exclude:
+          - os: macos-latest
+            zig_version: '2024.5.0-mach'
+          - os: macos-latest
+            zig_version: '0.14.0'
+          - os: macos-latest
+            zig_version: '0.15.0'
+        include:
+          - os: macos-13
+            zig_version: '2024.5.0-mach'
+          - os: macos-13
+            zig_version: '0.14.0'
+          - os: macos-13
+            zig_version: '0.15.0'
     steps:
       - name: Harden runner
         if: runner.os == 'Linux'
