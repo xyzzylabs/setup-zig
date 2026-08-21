@@ -2,6 +2,14 @@
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.3](https://github.com/xyzzylabs/setup-zig/compare/v1.0.2...v1.0.3) (2026-08-21)
+
+
+### Fixed
+
+* **deps:** bump @actions/cache to 6.2.0 and dev-deps; adapt to @types/node 26 ([#14](https://github.com/xyzzylabs/setup-zig/issues/14)) ([ee9dc3b](https://github.com/xyzzylabs/setup-zig/commit/ee9dc3b36d5e8d729f070fba62d6c1cf1283ce7e))
+* **deps:** bump brace-expansion to 1.1.18 ([#8](https://github.com/xyzzylabs/setup-zig/issues/8)) ([4b0bd01](https://github.com/xyzzylabs/setup-zig/commit/4b0bd01c32aaaa5311e3f21d1aef5fc0adf99bc2))
+
 ## [1.0.2](https://github.com/xyzzylabs/setup-zig/compare/v1.0.1...v1.0.2) (2026-07-09)
 
 
