@@ -1,9 +1,17 @@
 name: rebuild-dist
 
-# When Renovate bumps a bundled dependency, the committed dist/ goes stale
-# and the dist-drift gate in `test` fails. Renovate can't run the build
-# itself, so this workflow rebuilds dist/ on Renovate's PRs and pushes the
+# When a bot bumps a bundled dependency, the committed dist/ goes stale
+# and the dist-drift gate in `test` fails. The bot can't run the build
+# itself, so this workflow rebuilds dist/ on its PR and pushes the
 # regenerated bundle back onto the PR branch.
+#
+# Works out of the box for Renovate (its PRs can read Actions secrets).
+# For Dependabot, GitHub runs the PR with a read-only token and the
+# *Dependabot* secret store, not the Actions one — so the app-token step
+# only works once RELEASE_APP_ID and RELEASE_APP_PRIVATE_KEY are also
+# added under Settings → Secrets and variables → Dependabot. Until then,
+# a dist-changing Dependabot PR needs a manual `npm ci && npm run build`
+# commit (rare: only @actions/* runtime bumps change the bundle).
 
 on:
   pull_request:
@@ -22,9 +30,9 @@ concurrency:
 jobs:
   rebuild:
     name: Rebuild committed bundle
-    # Only act on Renovate's own PRs to avoid pushing to forks or arbitrary
-    # contributor branches.
-    if: ${{ github.actor == 'renovate[bot]' }}
+    # Only act on trusted bot PRs (in-repo branches), never forks or
+    # arbitrary contributor branches.
+    if: ${{ github.actor == 'renovate[bot]' || github.actor == 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -37,7 +45,9 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
         with:
-          app-id: ${{ vars.RELEASE_APP_ID }}
+          # Renovate/Actions runs read the variable; Dependabot runs have
+          # no variables store, so fall back to the Dependabot secret.
+          app-id: ${{ vars.RELEASE_APP_ID || secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - name: Check out PR branch
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
