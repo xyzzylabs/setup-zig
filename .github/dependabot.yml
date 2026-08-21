@@ -1,0 +1,40 @@
+version: 2
+updates:
+  # GitHub Actions used in workflows (all SHA-pinned; Dependabot rewrites
+  # the SHA and the trailing version comment together).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      # Action bumps don't change the published action → no release.
+      prefix: ci
+      include: scope
+    labels: [dependencies, ci]
+
+  # npm deps. Runtime (@actions/*) bumps can change the committed dist/
+  # bundle; the rebuild-dist workflow regenerates it on the PR. Dev-tool
+  # bumps (esbuild, typescript, @types) usually don't.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      actions-toolkit:
+        patterns: ['@actions/*']
+      dev-dependencies:
+        dependency-type: development
+    commit-message:
+      # `fix(deps):` so a runtime bump cuts a patch release; dev-dep bumps
+      # get `chore(deps-dev):` (hidden by release-please).
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    labels: [dependencies]
