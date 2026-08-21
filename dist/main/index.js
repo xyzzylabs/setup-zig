@@ -3324,8 +3324,8 @@ var require_data_url = __commonJS({
       return input.slice(start, position.position);
     }
     function stringPercentDecode(input) {
-      const bytes = encoder.encode(input);
-      return percentDecode(bytes);
+      const bytes2 = encoder.encode(input);
+      return percentDecode(bytes2);
     }
     function isHexCharByte(byte) {
       return byte >= 48 && byte <= 57 || byte >= 65 && byte <= 70 || byte >= 97 && byte <= 102;
@@ -4308,7 +4308,7 @@ var require_util2 = __commonJS({
         return false;
       }
     }
-    function bytesMatch(bytes, metadataList) {
+    function bytesMatch(bytes2, metadataList) {
       if (crypto7 === void 0) {
         return true;
       }
@@ -4324,7 +4324,7 @@ var require_util2 = __commonJS({
       for (const item of metadata2) {
         const algorithm = item.algo;
         const expectedValue = item.hash;
-        let actualValue = crypto7.createHash(algorithm).update(bytes).digest("base64");
+        let actualValue = crypto7.createHash(algorithm).update(bytes2).digest("base64");
         if (actualValue[actualValue.length - 1] === "=") {
           if (actualValue[actualValue.length - 2] === "=") {
             actualValue = actualValue.slice(0, -2);
@@ -4602,17 +4602,17 @@ var require_util2 = __commonJS({
       return input;
     }
     async function readAllBytes(reader) {
-      const bytes = [];
+      const bytes2 = [];
       let byteLength = 0;
       while (true) {
         const { done, value: chunk } = await reader.read();
         if (done) {
-          return Buffer.concat(bytes, byteLength);
+          return Buffer.concat(bytes2, byteLength);
         }
         if (!isUint8Array(chunk)) {
           throw new TypeError("Received non-Uint8Array chunk");
         }
-        bytes.push(chunk);
+        bytes2.push(chunk);
         byteLength += chunk.length;
       }
     }
@@ -5566,19 +5566,19 @@ Content-Type: ${value.type || "application/octet-stream"}\r
     function bodyMixinMethods(instance) {
       const methods = {
         blob() {
-          return consumeBody(this, (bytes) => {
+          return consumeBody(this, (bytes2) => {
             let mimeType = bodyMimeType(this);
             if (mimeType === null) {
               mimeType = "";
             } else if (mimeType) {
               mimeType = serializeAMimeType(mimeType);
             }
-            return new Blob2([bytes], { type: mimeType });
+            return new Blob2([bytes2], { type: mimeType });
           }, instance);
         },
         arrayBuffer() {
-          return consumeBody(this, (bytes) => {
-            return new Uint8Array(bytes).buffer;
+          return consumeBody(this, (bytes2) => {
+            return new Uint8Array(bytes2).buffer;
           }, instance);
         },
         text() {
@@ -5617,8 +5617,8 @@ Content-Type: ${value.type || "application/octet-stream"}\r
           }, instance);
         },
         bytes() {
-          return consumeBody(this, (bytes) => {
-            return new Uint8Array(bytes);
+          return consumeBody(this, (bytes2) => {
+            return new Uint8Array(bytes2);
           }, instance);
         }
       };
@@ -5653,8 +5653,8 @@ Content-Type: ${value.type || "application/octet-stream"}\r
       const body2 = object[kState].body;
       return body2 != null && (body2.stream.locked || util5.isDisturbed(body2.stream));
     }
-    function parseJSONFromBytes(bytes) {
-      return JSON.parse(utf8DecodeBytes(bytes));
+    function parseJSONFromBytes(bytes2) {
+      return JSON.parse(utf8DecodeBytes(bytes2));
     }
     function bodyMimeType(requestOrResponse) {
       const headers = requestOrResponse[kState].headersList;
@@ -12292,10 +12292,10 @@ var require_response = __commonJS({
         if (init !== null) {
           init = webidl.converters.ResponseInit(init);
         }
-        const bytes = textEncoder.encode(
+        const bytes2 = textEncoder.encode(
           serializeJavascriptValueToJSONString(data)
         );
-        const body2 = extractBody(bytes);
+        const body2 = extractBody(bytes2);
         const responseObject = fromInnerResponse(makeResponse({}), "response");
         initializeResponse(responseObject, init, { body: body2[0], type: "application/json" });
         return responseObject;
@@ -13752,12 +13752,12 @@ var require_fetch = __commonJS({
           processBodyError(response.error);
           return;
         }
-        const processBody = (bytes) => {
-          if (!bytesMatch(bytes, request2.integrity)) {
+        const processBody = (bytes2) => {
+          if (!bytesMatch(bytes2, request2.integrity)) {
             processBodyError("integrity mismatch");
             return;
           }
-          response.body = safelyExtractBody(bytes)[0];
+          response.body = safelyExtractBody(bytes2)[0];
           fetchFinale(fetchParams, response);
         };
         await fullyReadBody(response.body, processBody, processBodyError);
@@ -14170,12 +14170,12 @@ var require_fetch = __commonJS({
       if (request2.body == null && fetchParams.processRequestEndOfBody) {
         queueMicrotask(() => fetchParams.processRequestEndOfBody());
       } else if (request2.body != null) {
-        const processBodyChunk = async function* (bytes) {
+        const processBodyChunk = async function* (bytes2) {
           if (isCancelled(fetchParams)) {
             return;
           }
-          yield bytes;
-          fetchParams.processRequestBodyChunkLength?.(bytes.byteLength);
+          yield bytes2;
+          fetchParams.processRequestBodyChunkLength?.(bytes2.byteLength);
         };
         const processEndOfBody = () => {
           if (isCancelled(fetchParams)) {
@@ -14197,8 +14197,8 @@ var require_fetch = __commonJS({
         };
         requestBody = (async function* () {
           try {
-            for await (const bytes of request2.body.stream) {
-              yield* processBodyChunk(bytes);
+            for await (const bytes2 of request2.body.stream) {
+              yield* processBodyChunk(bytes2);
             }
             processEndOfBody();
           } catch (err) {
@@ -14249,33 +14249,33 @@ var require_fetch = __commonJS({
       fetchParams.controller.on("terminated", onAborted);
       fetchParams.controller.resume = async () => {
         while (true) {
-          let bytes;
+          let bytes2;
           let isFailure;
           try {
             const { done, value } = await fetchParams.controller.next();
             if (isAborted(fetchParams)) {
               break;
             }
-            bytes = done ? void 0 : value;
+            bytes2 = done ? void 0 : value;
           } catch (err) {
             if (fetchParams.controller.ended && !timingInfo.encodedBodySize) {
-              bytes = void 0;
+              bytes2 = void 0;
             } else {
-              bytes = err;
+              bytes2 = err;
               isFailure = true;
             }
           }
-          if (bytes === void 0) {
+          if (bytes2 === void 0) {
             readableStreamClose(fetchParams.controller.controller);
             finalizeResponse(fetchParams, response);
             return;
           }
-          timingInfo.decodedBodySize += bytes?.byteLength ?? 0;
+          timingInfo.decodedBodySize += bytes2?.byteLength ?? 0;
           if (isFailure) {
-            fetchParams.controller.terminate(bytes);
+            fetchParams.controller.terminate(bytes2);
             return;
           }
-          const buffer3 = new Uint8Array(bytes);
+          const buffer3 = new Uint8Array(bytes2);
           if (buffer3.byteLength) {
             fetchParams.controller.controller.enqueue(buffer3);
           }
@@ -14401,9 +14401,9 @@ var require_fetch = __commonJS({
               if (fetchParams.controller.dump) {
                 return;
               }
-              const bytes = chunk;
-              timingInfo.encodedBodySize += bytes.byteLength;
-              return this.body.push(bytes);
+              const bytes2 = chunk;
+              timingInfo.encodedBodySize += bytes2.byteLength;
+              return this.body.push(bytes2);
             },
             onComplete() {
               if (this.abort) {
@@ -14852,7 +14852,7 @@ var require_util4 = __commonJS({
       fr[kError] = null;
       const stream2 = blob.stream();
       const reader = stream2.getReader();
-      const bytes = [];
+      const bytes2 = [];
       let chunkPromise = reader.read();
       let isFirstChunk = true;
       (async () => {
@@ -14866,7 +14866,7 @@ var require_util4 = __commonJS({
             }
             isFirstChunk = false;
             if (!done && types.isUint8Array(value)) {
-              bytes.push(value);
+              bytes2.push(value);
               if ((fr[kLastProgressEventFired] === void 0 || Date.now() - fr[kLastProgressEventFired] >= 50) && !fr[kAborted]) {
                 fr[kLastProgressEventFired] = Date.now();
                 queueMicrotask(() => {
@@ -14878,7 +14878,7 @@ var require_util4 = __commonJS({
               queueMicrotask(() => {
                 fr[kState] = "done";
                 try {
-                  const result = packageData(bytes, type, blob.type, encodingName);
+                  const result = packageData(bytes2, type, blob.type, encodingName);
                   if (fr[kAborted]) {
                     return;
                   }
@@ -14918,7 +14918,7 @@ var require_util4 = __commonJS({
       });
       reader.dispatchEvent(event);
     }
-    function packageData(bytes, type, mimeType, encodingName) {
+    function packageData(bytes2, type, mimeType, encodingName) {
       switch (type) {
         case "DataURL": {
           let dataURL = "data:";
@@ -14928,7 +14928,7 @@ var require_util4 = __commonJS({
           }
           dataURL += ";base64,";
           const decoder = new StringDecoder2("latin1");
-          for (const chunk of bytes) {
+          for (const chunk of bytes2) {
             dataURL += btoa2(decoder.write(chunk));
           }
           dataURL += btoa2(decoder.end());
@@ -14948,16 +14948,16 @@ var require_util4 = __commonJS({
           if (encoding === "failure") {
             encoding = "UTF-8";
           }
-          return decode(bytes, encoding);
+          return decode(bytes2, encoding);
         }
         case "ArrayBuffer": {
-          const sequence = combineByteSequences(bytes);
+          const sequence = combineByteSequences(bytes2);
           return sequence.buffer;
         }
         case "BinaryString": {
           let binaryString = "";
           const decoder = new StringDecoder2("latin1");
-          for (const chunk of bytes) {
+          for (const chunk of bytes2) {
             binaryString += decoder.write(chunk);
           }
           binaryString += decoder.end();
@@ -14966,14 +14966,14 @@ var require_util4 = __commonJS({
       }
     }
     function decode(ioQueue, encoding) {
-      const bytes = combineByteSequences(ioQueue);
-      const BOMEncoding = BOMSniffing(bytes);
+      const bytes2 = combineByteSequences(ioQueue);
+      const BOMEncoding = BOMSniffing(bytes2);
       let slice = 0;
       if (BOMEncoding !== null) {
         encoding = BOMEncoding;
         slice = BOMEncoding === "UTF-8" ? 3 : 2;
       }
-      const sliced = bytes.slice(slice);
+      const sliced = bytes2.slice(slice);
       return new TextDecoder(encoding).decode(sliced);
     }
     function BOMSniffing(ioQueue) {
@@ -15526,9 +15526,9 @@ var require_cache = __commonJS({
           // 16.
         };
         operations.push(operation);
-        const bytes = await bodyReadPromise.promise;
+        const bytes2 = await bodyReadPromise.promise;
         if (clonedResponse.body != null) {
-          clonedResponse.body.source = bytes;
+          clonedResponse.body.source = bytes2;
         }
         const cacheJobPromise = createDeferredPromise();
         let errorData = null;
@@ -23083,7 +23083,7 @@ var require_package = __commonJS({
   "node_modules/@actions/cache/package.json"(exports2, module) {
     module.exports = {
       name: "@actions/cache",
-      version: "6.1.0",
+      version: "6.2.0",
       description: "Actions cache lib",
       keywords: [
         "github",
@@ -23200,7 +23200,7 @@ var require_base64 = __commonJS({
         es -= 2;
       else if (base64Str[base64Str.length - 1] == "=")
         es -= 1;
-      let bytes = new Uint8Array(es), bytePos = 0, groupPos = 0, b, p = 0;
+      let bytes2 = new Uint8Array(es), bytePos = 0, groupPos = 0, b, p = 0;
       for (let i = 0; i < base64Str.length; i++) {
         b = decTable[base64Str.charCodeAt(i)];
         if (b === void 0) {
@@ -23224,30 +23224,30 @@ var require_base64 = __commonJS({
             groupPos = 1;
             break;
           case 1:
-            bytes[bytePos++] = p << 2 | (b & 48) >> 4;
+            bytes2[bytePos++] = p << 2 | (b & 48) >> 4;
             p = b;
             groupPos = 2;
             break;
           case 2:
-            bytes[bytePos++] = (p & 15) << 4 | (b & 60) >> 2;
+            bytes2[bytePos++] = (p & 15) << 4 | (b & 60) >> 2;
             p = b;
             groupPos = 3;
             break;
           case 3:
-            bytes[bytePos++] = (p & 3) << 6 | b;
+            bytes2[bytePos++] = (p & 3) << 6 | b;
             groupPos = 0;
             break;
         }
       }
       if (groupPos == 1)
         throw Error(`invalid base64 string.`);
-      return bytes.subarray(0, bytePos);
+      return bytes2.subarray(0, bytePos);
     }
     exports2.base64decode = base64decode;
-    function base64encode2(bytes) {
+    function base64encode2(bytes2) {
       let base64 = "", groupPos = 0, b, p = 0;
-      for (let i = 0; i < bytes.length; i++) {
-        b = bytes[i];
+      for (let i = 0; i < bytes2.length; i++) {
+        b = bytes2[i];
         switch (groupPos) {
           case 0:
             base64 += encTable[b >> 2];
@@ -23285,23 +23285,23 @@ var require_protobufjs_utf8 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.utf8read = void 0;
     var fromCharCodes = (chunk) => String.fromCharCode.apply(String, chunk);
-    function utf8read(bytes) {
-      if (bytes.length < 1)
+    function utf8read(bytes2) {
+      if (bytes2.length < 1)
         return "";
       let pos = 0, parts = [], chunk = [], i = 0, t;
-      let len = bytes.length;
+      let len = bytes2.length;
       while (pos < len) {
-        t = bytes[pos++];
+        t = bytes2[pos++];
         if (t < 128)
           chunk[i++] = t;
         else if (t > 191 && t < 224)
-          chunk[i++] = (t & 31) << 6 | bytes[pos++] & 63;
+          chunk[i++] = (t & 31) << 6 | bytes2[pos++] & 63;
         else if (t > 239 && t < 365) {
-          t = ((t & 7) << 18 | (bytes[pos++] & 63) << 12 | (bytes[pos++] & 63) << 6 | bytes[pos++] & 63) - 65536;
+          t = ((t & 7) << 18 | (bytes2[pos++] & 63) << 12 | (bytes2[pos++] & 63) << 6 | bytes2[pos++] & 63) - 65536;
           chunk[i++] = 55296 + (t >> 10);
           chunk[i++] = 56320 + (t & 1023);
         } else
-          chunk[i++] = (t & 15) << 12 | (bytes[pos++] & 63) << 6 | bytes[pos++] & 63;
+          chunk[i++] = (t & 15) << 12 | (bytes2[pos++] & 63) << 6 | bytes2[pos++] & 63;
         if (i > 8191) {
           parts.push(fromCharCodes(chunk));
           i = 0;
@@ -23396,19 +23396,19 @@ var require_goog_varint = __commonJS({
       throw new Error("invalid varint");
     }
     exports2.varint64read = varint64read;
-    function varint64write(lo, hi, bytes) {
+    function varint64write(lo, hi, bytes2) {
       for (let i = 0; i < 28; i = i + 7) {
         const shift = lo >>> i;
         const hasNext = !(shift >>> 7 == 0 && hi == 0);
         const byte = (hasNext ? shift | 128 : shift) & 255;
-        bytes.push(byte);
+        bytes2.push(byte);
         if (!hasNext) {
           return;
         }
       }
       const splitBits = lo >>> 28 & 15 | (hi & 7) << 4;
       const hasMoreBits = !(hi >> 3 == 0);
-      bytes.push((hasMoreBits ? splitBits | 128 : splitBits) & 255);
+      bytes2.push((hasMoreBits ? splitBits | 128 : splitBits) & 255);
       if (!hasMoreBits) {
         return;
       }
@@ -23416,12 +23416,12 @@ var require_goog_varint = __commonJS({
         const shift = hi >>> i;
         const hasNext = !(shift >>> 7 == 0);
         const byte = (hasNext ? shift | 128 : shift) & 255;
-        bytes.push(byte);
+        bytes2.push(byte);
         if (!hasNext) {
           return;
         }
       }
-      bytes.push(hi >>> 31 & 1);
+      bytes2.push(hi >>> 31 & 1);
     }
     exports2.varint64write = varint64write;
     var TWO_PWR_32_DBL = (1 << 16) * (1 << 16);
@@ -23491,19 +23491,19 @@ var require_goog_varint = __commonJS({
       );
     }
     exports2.int64toString = int64toString;
-    function varint32write(value, bytes) {
+    function varint32write(value, bytes2) {
       if (value >= 0) {
         while (value > 127) {
-          bytes.push(value & 127 | 128);
+          bytes2.push(value & 127 | 128);
           value = value >>> 7;
         }
-        bytes.push(value);
+        bytes2.push(value);
       } else {
         for (let i = 0; i < 9; i++) {
-          bytes.push(value & 127 | 128);
+          bytes2.push(value & 127 | 128);
           value = value >> 7;
         }
-        bytes.push(1);
+        bytes2.push(1);
       }
     }
     exports2.varint32write = varint32write;
@@ -23774,7 +23774,7 @@ var require_binary_reader = __commonJS({
     var goog_varint_1 = require_goog_varint();
     var defaultsRead = {
       readUnknownField: true,
-      readerFactory: (bytes) => new BinaryReader(bytes)
+      readerFactory: (bytes2) => new BinaryReader(bytes2)
     };
     function binaryReadOptions(options) {
       return options ? Object.assign(Object.assign({}, defaultsRead), options) : defaultsRead;
@@ -24019,14 +24019,14 @@ var require_binary_writer = __commonJS({
         let len = 0;
         for (let i = 0; i < this.chunks.length; i++)
           len += this.chunks[i].length;
-        let bytes = new Uint8Array(len);
+        let bytes2 = new Uint8Array(len);
         let offset = 0;
         for (let i = 0; i < this.chunks.length; i++) {
-          bytes.set(this.chunks[i], offset);
+          bytes2.set(this.chunks[i], offset);
           offset += this.chunks[i].length;
         }
         this.chunks = [];
-        return bytes;
+        return bytes2;
       }
       /**
        * Start a new fork for length-delimited data like a message
@@ -31443,6 +31443,7 @@ var SystemTarPathOnWindows = `${process.env["SYSTEMDRIVE"]}\\Windows\\System32\\
 var TarFilename = "cache.tar";
 var ManifestFilename = "manifest.txt";
 var CacheFileSizeLimit = 10 * Math.pow(1024, 3);
+var CacheReadDeniedMessagePrefix = "cache read denied:";
 
 // node_modules/@actions/cache/lib/internal/cacheUtils.js
 var __awaiter12 = function(thisArg, _arguments, P, generator) {
@@ -59154,11 +59155,11 @@ var AvroParser = class _AvroParser {
    * @param options -
    */
   static async readFixedBytes(stream2, length, options = {}) {
-    const bytes = await stream2.read(length, { abortSignal: options.abortSignal });
-    if (bytes.length !== length) {
+    const bytes2 = await stream2.read(length, { abortSignal: options.abortSignal });
+    if (bytes2.length !== length) {
       throw new Error("Hit stream end.");
     }
-    return bytes;
+    return bytes2;
   }
   /**
    * Reads a single byte from the stream.
@@ -64154,6 +64155,20 @@ function getCacheServiceVersion() {
     return "v1";
   return process.env["ACTIONS_CACHE_SERVICE_V2"] ? "v2" : "v1";
 }
+var KNOWN_CACHE_MODES = ["none", "read", "write", "write-only"];
+function getCacheMode() {
+  return (process.env["ACTIONS_CACHE_MODE"] || "").trim().toLowerCase();
+}
+function isCacheReadable(mode) {
+  if (!KNOWN_CACHE_MODES.includes(mode))
+    return true;
+  return mode === "read" || mode === "write";
+}
+function isCacheWritable(mode) {
+  if (!KNOWN_CACHE_MODES.includes(mode))
+    return true;
+  return mode === "write" || mode === "write-only";
+}
 function getCacheServiceURL() {
   const version3 = getCacheServiceVersion();
   switch (version3) {
@@ -64227,6 +64242,7 @@ function createHttpClient() {
 }
 function getCacheEntry(keys, paths, options) {
   return __awaiter16(this, void 0, void 0, function* () {
+    var _a;
     const httpClient2 = createHttpClient();
     const version3 = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive);
     const resource = `cache?keys=${encodeURIComponent(keys.join(","))}&version=${version3}`;
@@ -64240,6 +64256,10 @@ function getCacheEntry(keys, paths, options) {
       return null;
     }
     if (!isSuccessStatusCode(response.statusCode)) {
+      const errorMessage = (_a = response.error) === null || _a === void 0 ? void 0 : _a.message;
+      if (errorMessage === null || errorMessage === void 0 ? void 0 : errorMessage.includes(CacheReadDeniedMessagePrefix)) {
+        throw new Error(errorMessage);
+      }
       throw new Error(`Cache service responded with ${response.statusCode}`);
     }
     const cacheResult = response.result;
@@ -65488,6 +65508,14 @@ var CacheWriteDeniedError = class _CacheWriteDeniedError extends ReserveCacheErr
     Object.setPrototypeOf(this, _CacheWriteDeniedError.prototype);
   }
 };
+var CACHE_READ_DENIED_PREFIX = CacheReadDeniedMessagePrefix;
+var CacheReadDeniedError = class _CacheReadDeniedError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "CacheReadDeniedError";
+    Object.setPrototypeOf(this, _CacheReadDeniedError.prototype);
+  }
+};
 var FinalizeCacheError = class _FinalizeCacheError extends Error {
   constructor(message) {
     super(message);
@@ -65514,6 +65542,12 @@ function restoreCache(paths_1, primaryKey_1, restoreKeys_1, options_1) {
     const cacheServiceVersion = getCacheServiceVersion();
     debug(`Cache service version: ${cacheServiceVersion}`);
     checkPaths(paths);
+    const cacheMode = getCacheMode();
+    if (!isCacheReadable(cacheMode)) {
+      info(`Cache restore skipped: the effective cache-mode '${cacheMode}' does not permit reads.`);
+      debug(`Skipped restore for paths [${paths.join(", ")}] with primary key '${primaryKey}'.`);
+      return void 0;
+    }
     switch (cacheServiceVersion) {
       case "v2":
         return yield restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsArchive);
@@ -65525,6 +65559,7 @@ function restoreCache(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 }
 function restoreCacheV1(paths_1, primaryKey_1, restoreKeys_1, options_1) {
   return __awaiter19(this, arguments, void 0, function* (paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
+    var _a;
     restoreKeys = restoreKeys || [];
     const keys = [primaryKey, ...restoreKeys];
     debug("Resolved Keys:");
@@ -65538,10 +65573,19 @@ function restoreCacheV1(paths_1, primaryKey_1, restoreKeys_1, options_1) {
     const compressionMethod = yield getCompressionMethod();
     let archivePath = "";
     try {
-      const cacheEntry = yield getCacheEntry(keys, paths, {
-        compressionMethod,
-        enableCrossOsArchive
-      });
+      let cacheEntry;
+      try {
+        cacheEntry = yield getCacheEntry(keys, paths, {
+          compressionMethod,
+          enableCrossOsArchive
+        });
+      } catch (error2) {
+        const errorMessage = (_a = error2 === null || error2 === void 0 ? void 0 : error2.message) !== null && _a !== void 0 ? _a : "";
+        if (errorMessage.includes(CACHE_READ_DENIED_PREFIX)) {
+          throw new CacheReadDeniedError(errorMessage);
+        }
+        throw error2;
+      }
       if (!(cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.archiveLocation)) {
         return void 0;
       }
@@ -65583,6 +65627,7 @@ function restoreCacheV1(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 }
 function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
   return __awaiter19(this, arguments, void 0, function* (paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
+    var _a;
     options = Object.assign(Object.assign({}, options), { useAzureSdk: true });
     restoreKeys = restoreKeys || [];
     const keys = [primaryKey, ...restoreKeys];
@@ -65603,7 +65648,16 @@ function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
         restoreKeys,
         version: getCacheVersion(paths, compressionMethod, enableCrossOsArchive)
       };
-      const response = yield twirpClient.GetCacheEntryDownloadURL(request2);
+      let response;
+      try {
+        response = yield twirpClient.GetCacheEntryDownloadURL(request2);
+      } catch (error2) {
+        const errorMessage = (_a = error2 === null || error2 === void 0 ? void 0 : error2.message) !== null && _a !== void 0 ? _a : "";
+        if (errorMessage.includes(CACHE_READ_DENIED_PREFIX)) {
+          throw new CacheReadDeniedError(errorMessage);
+        }
+        throw error2;
+      }
       if (!response.ok) {
         debug(`Cache not found for version ${request2.version} of keys: ${keys.join(", ")}`);
         return void 0;
@@ -65659,6 +65713,12 @@ function saveCache2(paths_1, key_1, options_1) {
     debug(`Cache service version: ${cacheServiceVersion}`);
     checkPaths(paths);
     checkKey(key);
+    const cacheMode = getCacheMode();
+    if (!isCacheWritable(cacheMode)) {
+      info(`Cache save skipped: the effective cache-mode '${cacheMode}' does not permit writes.`);
+      debug(`Skipped save for paths [${paths.join(", ")}] with key '${key}'.`);
+      return -1;
+    }
     switch (cacheServiceVersion) {
       case "v2":
         return yield saveCacheV2(paths, key, options, enableCrossOsArchive);
@@ -65716,8 +65776,6 @@ function saveCacheV1(paths_1, key_1, options_1) {
       const typedError = error2;
       if (typedError.name === ValidationError.name) {
         throw error2;
-      } else if (typedError.name === CacheWriteDeniedError.name) {
-        warning(`Failed to save: ${typedError.message}`);
       } else if (typedError.name === ReserveCacheError.name) {
         info(`Failed to save: ${typedError.message}`);
       } else {
@@ -65805,8 +65863,6 @@ function saveCacheV2(paths_1, key_1, options_1) {
       const typedError = error2;
       if (typedError.name === ValidationError.name) {
         throw error2;
-      } else if (typedError.name === CacheWriteDeniedError.name) {
-        warning(`Failed to save: ${typedError.message}`);
       } else if (typedError.name === ReserveCacheError.name) {
         info(`Failed to save: ${typedError.message}`);
       } else if (typedError.name === FinalizeCacheError.name) {
@@ -70014,6 +70070,11 @@ function getZigCachePath() {
 import * as crypto5 from "node:crypto";
 import * as fs10 from "node:fs";
 import { pipeline as pipeline2 } from "node:stream/promises";
+function bytes(b) {
+  const out = new Uint8Array(b.byteLength);
+  out.set(b);
+  return out;
+}
 async function parseKey(key_str) {
   const key_info = Buffer.from(key_str, "base64");
   const id = key_info.subarray(2, 10);
@@ -70075,11 +70136,11 @@ async function verifySignatureStream(pubkey, signature, tarball_path) {
   } else {
     return false;
   }
-  if (!await crypto5.subtle.verify("Ed25519", pubkey.key, signature.signature, signed_content)) {
+  if (!await crypto5.subtle.verify("Ed25519", pubkey.key, bytes(signature.signature), bytes(signed_content))) {
     return false;
   }
   const global_signed = Buffer.concat([signature.signature, signature.trusted_comment]);
-  return await crypto5.subtle.verify("Ed25519", pubkey.key, signature.global_signature, global_signed);
+  return await crypto5.subtle.verify("Ed25519", pubkey.key, bytes(signature.global_signature), bytes(global_signed));
 }
 
 // src/race.ts

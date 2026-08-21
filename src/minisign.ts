@@ -2,6 +2,17 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 
+// Node's Buffer is typed `Buffer<ArrayBufferLike>`, but Web Crypto's
+// `BufferSource` wants an ArrayBuffer-backed view (ArrayBufferLike also
+// admits SharedArrayBuffer). Present our buffers as a plain Uint8Array so
+// the crypto calls type-check under strict @types/node. The copy is tiny —
+// signatures, digests and trusted comments are all a few dozen bytes.
+function bytes(b: Buffer): Uint8Array<ArrayBuffer> {
+  const out = new Uint8Array(b.byteLength);
+  out.set(b);
+  return out;
+}
+
 export interface ParsedKey {
   id: Buffer;
   key: crypto.webcrypto.CryptoKey;
@@ -93,12 +104,12 @@ export async function verifySignatureStream(
     return false;
   }
 
-  if (!await crypto.subtle.verify('Ed25519', pubkey.key, signature.signature, signed_content)) {
+  if (!await crypto.subtle.verify('Ed25519', pubkey.key, bytes(signature.signature), bytes(signed_content))) {
     return false;
   }
 
   const global_signed = Buffer.concat([signature.signature, signature.trusted_comment]);
-  return await crypto.subtle.verify('Ed25519', pubkey.key, signature.global_signature, global_signed);
+  return await crypto.subtle.verify('Ed25519', pubkey.key, bytes(signature.global_signature), bytes(global_signed));
 }
 
 // In-memory verification, kept for tests against small fixtures.
@@ -120,10 +131,10 @@ export async function verifySignature(
     return false;
   }
 
-  if (!await crypto.subtle.verify('Ed25519', pubkey.key, signature.signature, signed_content)) {
+  if (!await crypto.subtle.verify('Ed25519', pubkey.key, bytes(signature.signature), bytes(signed_content))) {
     return false;
   }
 
   const global_signed = Buffer.concat([signature.signature, signature.trusted_comment]);
-  return await crypto.subtle.verify('Ed25519', pubkey.key, signature.global_signature, global_signed);
+  return await crypto.subtle.verify('Ed25519', pubkey.key, bytes(signature.global_signature), bytes(global_signed));
 }
