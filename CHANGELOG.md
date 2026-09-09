@@ -2,6 +2,13 @@
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.4](https://github.com/xyzzylabs/setup-zig/compare/v1.0.3...v1.0.4) (2026-09-09)
+
+
+### Fixed
+
+* retry version-index fetches and treat timeouts as transient ([#20](https://github.com/xyzzylabs/setup-zig/issues/20)) ([7d1bd82](https://github.com/xyzzylabs/setup-zig/commit/7d1bd828becaf8e5fcf08e5b759ba4269be8839d))
+
 ## [1.0.3](https://github.com/xyzzylabs/setup-zig/compare/v1.0.2...v1.0.3) (2026-08-21)
 
 
