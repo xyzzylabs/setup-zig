@@ -11,7 +11,9 @@ export function isTransient(err: unknown): boolean {
   if (!(err instanceof Error)) return false;
   // AbortError sets err.name; the message ("The operation was aborted") does
   // not mention "abort" in a way we can grep reliably across runtimes.
-  if (err.name === 'AbortError') return true;
+  // AbortSignal.timeout() rejects with a DOMException named TimeoutError
+  // rather than AbortError — a slow mirror is transient, so retry it too.
+  if (err.name === 'AbortError' || err.name === 'TimeoutError') return true;
   const msg = err.message;
   // @actions/tool-cache and friends emit "Unexpected HTTP response: 5xx";
   // accept any non-digit run between "HTTP" and the status code.

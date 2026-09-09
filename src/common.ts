@@ -10,6 +10,7 @@ import {
   lookupMachVersion,
 } from './schema.ts';
 import { errMessage, isErrnoException } from './util.ts';
+import { withRetry } from './retry.ts';
 
 const VERSIONS_JSON = 'https://ziglang.org/download/index.json';
 const MACH_VERSIONS_JSON = 'https://pkg.machengine.org/zig/index.json';
@@ -123,12 +124,17 @@ function compareReleaseParts(a: [number, number, number], b: [number, number, nu
   return (a[0] - b[0]) || (a[1] - b[1]) || (a[2] - b[2]);
 }
 
+// Version resolution happens before any mirror is contacted, so a single
+// slow response here fails the whole job with nothing else attempted. Retry
+// transient failures (timeout, 5xx, connection reset) once.
 async function fetchJsonWithTimeout(url: string, timeout_ms: number): Promise<unknown> {
-  const resp = await fetch(url, { signal: AbortSignal.timeout(timeout_ms) });
-  if (!resp.ok) {
-    throw new Error(`Fetch ${url} failed: HTTP ${resp.status}`);
-  }
-  return await resp.json();
+  return await withRetry(async () => {
+    const resp = await fetch(url, { signal: AbortSignal.timeout(timeout_ms) });
+    if (!resp.ok) {
+      throw new Error(`Fetch ${url} failed: HTTP ${resp.status}`);
+    }
+    return await resp.json();
+  });
 }
 
 export async function getTarballName(): Promise<string> {

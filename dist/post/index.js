@@ -68725,6 +68725,43 @@ function errMessage(err) {
   }
 }
 
+// src/retry.ts
+var TransientError = class extends Error {
+  name = "TransientError";
+};
+function isTransient(err) {
+  if (err instanceof TransientError) return true;
+  if (!(err instanceof Error)) return false;
+  if (err.name === "AbortError" || err.name === "TimeoutError") return true;
+  const msg = err.message;
+  const http_match = /HTTP\D+(\d{3})/i.exec(msg);
+  if (http_match) {
+    const code = Number(http_match[1]);
+    return code >= 500 && code < 600;
+  }
+  return /ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|ECONNREFUSED|socket hang up/i.test(msg);
+}
+async function withRetry(fn, opts = {}) {
+  const retries = opts.retries ?? 1;
+  const min_delay = opts.minDelayMs ?? 500;
+  const jitter = opts.jitterMs ?? 500;
+  const classify = opts.isTransient ?? isTransient;
+  const sleep2 = opts.sleep ?? defaultSleep;
+  let attempt = 0;
+  for (; ; ) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= retries || !classify(err)) throw err;
+      attempt++;
+      await sleep2(min_delay + Math.floor(Math.random() * jitter));
+    }
+  }
+}
+function defaultSleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 // src/common.ts
 var VERSIONS_JSON = "https://ziglang.org/download/index.json";
 var MACH_VERSIONS_JSON = "https://pkg.machengine.org/zig/index.json";
@@ -68818,11 +68855,13 @@ function compareReleaseParts(a, b) {
   return a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 }
 async function fetchJsonWithTimeout(url2, timeout_ms) {
-  const resp = await fetch(url2, { signal: AbortSignal.timeout(timeout_ms) });
-  if (!resp.ok) {
-    throw new Error(`Fetch ${url2} failed: HTTP ${resp.status}`);
-  }
-  return await resp.json();
+  return await withRetry(async () => {
+    const resp = await fetch(url2, { signal: AbortSignal.timeout(timeout_ms) });
+    if (!resp.ok) {
+      throw new Error(`Fetch ${url2} failed: HTTP ${resp.status}`);
+    }
+    return await resp.json();
+  });
 }
 async function getTarballName() {
   const version3 = await getVersion2();
