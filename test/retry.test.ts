@@ -34,6 +34,18 @@ test('isTransient: common network errnos are transient', () => {
   assert.equal(isTransient(aborted), true);
 });
 
+test('isTransient: AbortSignal.timeout rejection is transient', async () => {
+  // The real shape a timed-out fetch produces: a DOMException named
+  // TimeoutError whose message mentions neither "abort" nor an errno.
+  const err = await new Promise<unknown>(resolve => {
+    AbortSignal.timeout(1).addEventListener('abort', function (this: AbortSignal) {
+      resolve(this.reason);
+    });
+  });
+  assert.equal((err as Error).name, 'TimeoutError');
+  assert.equal(isTransient(err), true);
+});
+
 test('isTransient: arbitrary application error is NOT transient', () => {
   assert.equal(isTransient(new Error('signature verification failed')), false);
   assert.equal(isTransient(new Error('filename mismatch')), false);
