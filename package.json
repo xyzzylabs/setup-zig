@@ -33,14 +33,14 @@
     "minisign"
   ],
   "dependencies": {
-    "@actions/cache": "^6.2.0",
+    "@actions/cache": "^6.3.0",
     "@actions/core": "^3.0.1",
     "@actions/exec": "^3.0.0",
     "@actions/github": "^9.1.1",
     "@actions/tool-cache": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.4",
     "@typescript/native-preview": "^7.0.0-dev.20260707.2",
     "esbuild": "^0.28.2",
     "typescript": "^7.0.2"
