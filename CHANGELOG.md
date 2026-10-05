@@ -2,6 +2,13 @@
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.5](https://github.com/xyzzylabs/setup-zig/compare/v1.0.4...v1.0.5) (2026-10-05)
+
+
+### Fixed
+
+* **deps:** bump @actions/cache to 6.3.0, undici to 6.29.0 and dev-deps ([#29](https://github.com/xyzzylabs/setup-zig/issues/29)) ([0a807f3](https://github.com/xyzzylabs/setup-zig/commit/0a807f35792bdf4a92c4604066e1af10f6a11204))
+
 ## [1.0.4](https://github.com/xyzzylabs/setup-zig/compare/v1.0.3...v1.0.4) (2026-09-09)
 
 
