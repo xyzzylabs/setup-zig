@@ -1,6 +1,6 @@
 {
   "name": "setup-zig",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "description": "GitHub Action that installs the Zig compiler and caches the global Zig cache directory.",
   "type": "module",
