@@ -27,7 +27,7 @@ All inputs are optional.
 
 | Name               | Default | What it does                                                                                                                                                              |
 |--------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `version`          | _auto_  | Explicit Zig version. Accepts `0.16.0`, `0.17.0-dev.123+abcdef012`, `2024.5.0-mach`, `master`, or `latest`. Overrides all auto-resolution.                                 |
+| `version`          | _auto_  | Explicit Zig version. Accepts `0.17.0`, `0.18.0-dev.123+abcdef012`, `2024.5.0-mach`, `master`, or `latest`. Overrides all auto-resolution.                                 |
 | `zig-version-file` | _auto_  | Path to a file containing the version (`.zigversion`, `.tool-versions`, etc.). Plain string or `zig <version>` line accepted. Ignored when `version` is set.              |
 | `mirror`           | _auto_  | Force a specific mirror, e.g. `https://pkg.machengine.org/zig`. Cannot be `https://ziglang.org`.                                                                          |
 | `libc`             | `glibc` | Linux only: `glibc` or `musl`. Ignored on macOS / Windows.                                                                                                                |
@@ -40,7 +40,7 @@ All inputs are optional.
 
 | Name           | Example value                                       | What it means                                                                                                       |
 |----------------|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| `zig-version`  | `0.16.0`                                            | The version that was resolved and installed.                                                                        |
+| `zig-version`  | `0.17.0`                                            | The version that was resolved and installed.                                                                        |
 | `mirror-used`  | `https://pkg.machengine.org/zig`, `cache`, `tool-cache` | The mirror that served the tarball, or the cache layer that served the install.                                  |
 | `cache-hit`    | `true` / `false`                                    | Whether Zig was served from a cache.                                                                                |
 
@@ -57,7 +57,7 @@ All inputs are optional.
 ```yaml
 - uses: xyzzylabs/setup-zig@v1
   with:
-    version: 0.16.0
+    version: 0.17.0
 ```
 
 ### Read version from a file
