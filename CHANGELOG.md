@@ -2,6 +2,18 @@
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.6](https://github.com/xyzzylabs/setup-zig/compare/v1.0.5...v1.0.6) (2026-10-27)
+
+
+### Fixed
+
+* **deps:** bump undici from 6.29.0 to 6.29.1 ([#35](https://github.com/xyzzylabs/setup-zig/issues/35)) ([53bd2a8](https://github.com/xyzzylabs/setup-zig/commit/53bd2a8b3ffb6363a4d36561dad50154f2464335))
+
+
+### Documentation
+
+* update README examples to Zig 0.17.0 ([#36](https://github.com/xyzzylabs/setup-zig/issues/36)) ([26bb77b](https://github.com/xyzzylabs/setup-zig/commit/26bb77bc014264a7e2f43d146b6290b9ad944f1e))
+
 ## [1.0.5](https://github.com/xyzzylabs/setup-zig/compare/v1.0.4...v1.0.5) (2026-10-05)
 
 
