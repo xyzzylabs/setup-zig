@@ -2,6 +2,13 @@
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.0.7](https://github.com/xyzzylabs/setup-zig/compare/v1.0.6...v1.0.7) (2026-11-12)
+
+
+### Fixed
+
+* **deps:** bump fast-xml-parser from 5.8.0 to 5.12.0 ([#41](https://github.com/xyzzylabs/setup-zig/issues/41)) ([0db4d48](https://github.com/xyzzylabs/setup-zig/commit/0db4d48013002a3b15b29a46e2829201820e76b3))
+
 ## [1.0.6](https://github.com/xyzzylabs/setup-zig/compare/v1.0.5...v1.0.6) (2026-10-27)
 
 
