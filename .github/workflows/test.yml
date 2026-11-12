@@ -148,13 +148,14 @@ jobs:
           - '0.14.1'  # zig-linux-x86_64 -> zig-x86_64-linux
           - '0.15.0'
           - '0.15.1'  # armv7a -> arm
-          - '0.16.0'  # current stable; keep pinned so coverage survives the next release
+          - '0.16.0'  # oldest release that links on the macOS 26 SDK
+          - '0.17.0'  # current stable line; keep pinned so coverage survives the next release
         # `macos-latest` is now macOS 26 (Tahoe). Every Zig release before
         # 0.16.0 ships a bundled compiler-rt whose macOS availability stubs
         # reference `__availability_version_check`, a symbol the linker on the
         # macOS 26 SDK no longer resolves — the link then fails with "undefined
         # symbol: __availability_version_check" (plus _abort, _malloc_size,
-        # _sigaction, …). Only 0.16.0 / latest / master link on that SDK. Run
+        # _sigaction, …). Only 0.16.0 and newer link on that SDK. Run
         # the affected legacy versions on `macos-15`, whose older SDK still
         # exports that symbol, so we keep real macOS coverage instead of
         # dropping it. (macos-13 and macos-14 are retired; 2024.5.0-mach
