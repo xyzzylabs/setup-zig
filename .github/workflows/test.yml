@@ -155,10 +155,10 @@ jobs:
         # macOS 26 SDK no longer resolves — the link then fails with "undefined
         # symbol: __availability_version_check" (plus _abort, _malloc_size,
         # _sigaction, …). Only 0.16.0 / latest / master link on that SDK. Run
-        # the affected legacy versions on `macos-14`, whose older SDK still
+        # the affected legacy versions on `macos-15`, whose older SDK still
         # exports that symbol, so we keep real macOS coverage instead of
-        # dropping it. (macos-13 is retired; 2024.5.0-mach resolves to a
-        # 0.13.0-dev build and is affected too.)
+        # dropping it. (macos-13 and macos-14 are retired; 2024.5.0-mach
+        # resolves to a 0.13.0-dev build and is affected too.)
         exclude:
           - os: macos-latest
             zig_version: '2024.5.0-mach'
@@ -171,15 +171,15 @@ jobs:
           - os: macos-latest
             zig_version: '0.15.1'
         include:
-          - os: macos-14
+          - os: macos-15
             zig_version: '2024.5.0-mach'
-          - os: macos-14
+          - os: macos-15
             zig_version: '0.14.0'
-          - os: macos-14
+          - os: macos-15
             zig_version: '0.14.1'
-          - os: macos-14
+          - os: macos-15
             zig_version: '0.15.0'
-          - os: macos-14
+          - os: macos-15
             zig_version: '0.15.1'
     steps:
       - name: Harden runner
